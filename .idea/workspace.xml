@@ -4,19 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0fc71f9e-57de-4be2-ac27-e55f727d3ead" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Templates/accounts/account.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/accounts/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/accounts/registration.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/posts/create.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/posts/posts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/posts/update.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Templates/security/security.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/csc2031blog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csc2031blog.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="0fc71f9e-57de-4be2-ac27-e55f727d3ead" name="Changes" comment="exercise 2">
+      <change afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/posts/views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/security/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/home/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -27,8 +19,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -123,8 +115,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727433487197</updated>
-      <workItem from="1732540556681" duration="5302000" />
+      <workItem from="1732540556681" duration="6186000" />
     </task>
+    <task id="LOCAL-00001" summary="exercise 2">
+      <option name="closed" value="true" />
+      <created>1732564886177</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1732564886177</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -141,7 +142,11 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="exercise 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="exercise 2" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/csc2031_coursework$app.coverage" NAME="app Coverage Results" MODIFIED="1732564474479" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/csc2031_coursework$app.coverage" NAME="app Coverage Results" MODIFIED="1732565546290" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>
