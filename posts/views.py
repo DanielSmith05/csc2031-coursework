@@ -1,12 +1,14 @@
 from flask import Blueprint, render_template, flash, url_for, redirect
 from config import db, Post
 from posts.forms import PostForm
+from sqlalchemy import desc
 
 posts_bp = Blueprint('posts', __name__, template_folder='templates')
 
 @posts_bp.route('/posts')
 def posts():
-    return render_template('posts/posts.html')
+    all_posts = Post.query.order_by(desc('id')).all()
+    return render_template('posts/posts.html', posts=all_posts)
 
 @posts_bp.route('/create', methods=('GET', 'POST'))
 def create():
