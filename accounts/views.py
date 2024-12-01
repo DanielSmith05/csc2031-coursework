@@ -1,11 +1,19 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, flash, redirect, url_for
+from accounts.forms import RegistrationForm
+from config import User, db
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
 
-@accounts_bp.route('/registration')
-def registration():
-    return render_template('accounts/registration.html')
 
+@accounts_bp.route('/registration', methods=['GET', 'POST'])
+def registration():
+    form = RegistrationForm()
+
+    if form.validate_on_submit():
+        flash('Account Created', category='success')
+        return redirect(url_for('accounts.login'))
+
+    return render_template('accounts/registration.html', form=form)
 
 @accounts_bp.route('/login')
 def login():
