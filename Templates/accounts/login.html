@@ -1,5 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <div class="container">
     <h1>Login</h1>
+    <div class="p-2 row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <div>
+                <p>Please complete the following form to login to an account to use the CSC2031 Blog.</p>
+            </div>
+
+            <form method="POST">
+                <div class="p-2 bg-light border border-primary">
+                    <div style="text-align: left">
+                        {{ form.csrf_token() }}
+                        <div>
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} mt-3 alert-dismissible" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        onclick=delete_flash(this)>
+                                    <span></span>
+                                </button>
+                            </div>
+                            {% endfor %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.email.label}}<span style="color: red">*</span>
+                            {{ form.email(class="form-control") }}
+                            </div>
+                        <div class="form-group">
+                            {{ form.password.label}}<span style="color: red">*</span>
+                            {{ form.password(class="form-control") }}
+                        </div>
+
+                    </div>
+                    <div>
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </div>
+            </form>
+
+        </div>
+        <div class="col-3"></div>
+    </div>
+
+</div>
 {% endblock %}
