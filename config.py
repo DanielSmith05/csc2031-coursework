@@ -1,5 +1,4 @@
 from flask import Flask, url_for
-
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
@@ -8,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import MetaData
 from datetime import datetime
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 app = Flask(__name__)
 
 # SECRET KEY FOR FLASK FORMS
@@ -17,6 +18,11 @@ app.config['SECRET_KEY'] = secrets.token_hex(16)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///csc2031blog.db'
 app.config['SQLALCHEMY_ECHO'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# CAPTCHA CONFIGURATION
+app.config['RECAPTCHA_USE_SSL'] = False
+app.config['RECAPTCHA_PUBLIC_KEY'] = "6LcEQpAqAAAAAJuGiMF9F6Fevk-lG8b4WueXpgc_"
+app.config['RECAPTCHA_PRIVATE_KEY'] = "6LcEQpAqAAAAAGyXUM3uPXyKcRDE9ww8wWbUhUwS"
 
 metadata = MetaData(
     naming_convention={
@@ -79,7 +85,6 @@ class User(db.Model):
 
 
 
-
 # DATABASE ADMINISTRATOR
 class MainIndexLink(MenuLink):
     def get_url(self):
@@ -100,6 +105,11 @@ admin._menu = admin._menu[1:]
 admin.add_link(MainIndexLink(name='Home Page'))
 admin.add_view(PostView(Post, db.session))
 admin.add_view(UserView(User, db.session))
+
+
+limiter = Limiter(get_remote_address, app=app)
+default_limit = ['500/day']
+
 
 # IMPORT BLUEPRINTS
 from accounts.views import accounts_bp
