@@ -14,4 +14,7 @@ Flask-SQLAlchemy
 Flask-WTF
 Flask-Admin
 Flask-Limiter
+flask-qrcode
 WTForms
+
+pyotp

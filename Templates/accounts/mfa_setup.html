@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>MFA Setup</h1>
+    <p>Follow these instructions to set up MFA:</p>
+    <ul>
+        <li>Download an authenticator app (e.g., Google Authenticator).</li>
+        <li>Scan the QR code or manually enter the MFA key.</li>
+    </ul>
+    <p>Your MFA key is: {{ user.mfa_key }}</p>
+
+    <form method="POST">
+        <label for="mfa_pin">Enter MFA PIN:</label>
+        <input type="text" id="mfa_pin" name="mfa_pin" required>
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{{ url_for('accounts.login') }}">Back to Login</a>
+{% endblock %}

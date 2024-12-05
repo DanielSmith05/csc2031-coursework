@@ -23,6 +23,10 @@
                             {{ form.password.label}}<span style="color: red">*</span>
                             {{ form.password(class="form-control") }}
                         </div>
+                        <div class="form-group">
+                            {{ form.mfa_pin.label}}<span style="color: red">*</span>
+                            {{ form.mfa_pin(class="form-control") }}
+                        </div>
                         <div>
                             Render - <div class="form-group">{{ form.recaptcha }}</div>
                         </div>

@@ -1,4 +1,4 @@
-from flask import Flask, url_for
+from flask import Flask, url_for, request
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
@@ -9,6 +9,7 @@ from sqlalchemy import MetaData
 from datetime import datetime
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import pyotp
 app = Flask(__name__)
 
 # SECRET KEY FOR FLASK FORMS
@@ -73,6 +74,9 @@ class User(db.Model):
     lastname = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
 
+    mfa_key = db.Column(db.String(100), nullable=False, default=lambda: pyotp.random_base32())  # MFA Key
+    mfa_enabled = db.Column(db.Boolean, nullable=False, default=False)  # MFA enabled flag
+
     # User posts
     posts = db.relationship("Post", order_by=Post.id, back_populates="user")
 
@@ -82,6 +86,14 @@ class User(db.Model):
         self.lastname = lastname
         self.phone = phone
         self.password = password
+
+
+    def enable_mfa(self):
+        """Enable MFA for the user."""
+        self.mfa_enabled = True
+        db.session.commit()
+
+
 
 
 
@@ -98,7 +110,7 @@ class PostView(ModelView):
 class UserView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
-    column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'posts')
+    column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'mfa_key', 'mfa_enabled', 'posts')
 
 admin = Admin(app, name='DB Admin', template_mode='bootstrap4')
 admin._menu = admin._menu[1:]

@@ -16,6 +16,7 @@ class RegistrationForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+    mfa_pin = StringField('MFA Code', validators=[DataRequired()])
     submit = SubmitField('Submit')
     recaptcha = RecaptchaField()
 
