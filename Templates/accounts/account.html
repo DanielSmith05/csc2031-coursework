@@ -17,23 +17,23 @@
         <div class="user-posts">
             <h2>Your Posts</h2>
             {% for post in current_user.posts %}
-                <div class="card border border-dark">
-                    <div class="card-header bg-dark text-white border border-dark">
-                        <h3>{{ post.title }}</h3>
-                        <p>{{ post.body }}</p>
-                        <small>Posted on {{ post.created.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                    </div>
-                    </div>
-                    <div class="card-body">{{ post.body }}</div>
-
-                    <div class="card-footer">
-                        <a class="navbar-item" href="{{ url_for('posts.update', id=post.id) }}">Update</a>
-                        <a class="navbar-item" href="{{ url_for('posts.delete', id=post.id) }}">Delete</a>
-                    </div>
-
+            <div class="card mb-3">
+                <div class="card-header bg-dark text-white">
+                    <h3>{{ post.title }}</h3>
+                    <small>
+                        Posted by {{ post.user.firstname }} {{ post.user.lastname }}
+                        on {{ post.created.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </small>
                 </div>
-                <br>
-                {% endfor %}
+                <div class="card-body">
+                    <p>{{ post.body }}</p>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('posts.update', id=post.id) }}">Update</a>
+                    <a href="{{ url_for('posts.delete', id=post.id) }}">Delete</a>
+                </div>
+            </div>
+        {% endfor %}
         </div>
     {% else %}
         <p>You must be logged in to view this page.</p>

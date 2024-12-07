@@ -20,8 +20,7 @@ def create():
     form = PostForm()
 
     if form.validate_on_submit():
-        new_post = Post(title=form.title.data, body=form.body.data)
-        new_post.userid = current_user.id  # Associate post with the logged-in user
+        new_post = Post(user=current_user, title=form.title.data, body=form.body.data)
 
         db.session.add(new_post)
         db.session.commit()
