@@ -1,5 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Account</h1>
+<div class="container">
+    <h1>Account Details</h1>
+
+    {% if current_user.is_authenticated %}
+        <div class="account-info">
+            <h2>Personal Information</h2>
+            <p><strong>Account Number:</strong> {{ current_user.id }}</p>
+            <p><strong>Email:</strong> {{ current_user.email }}</p>
+            <p><strong>First Name:</strong> {{ current_user.firstname }}</p>
+            <p><strong>Last Name:</strong> {{ current_user.lastname }}</p>
+            <p><strong>Phone Number:</strong> {{ current_user.phone }}</p>
+        </div>
+
+        <div class="user-posts">
+            <h2>Your Posts</h2>
+            {% for post in current_user.posts %}
+                <div class="card border border-dark">
+                    <div class="card-header bg-dark text-white border border-dark">
+                        <h3>{{ post.title }}</h3>
+                        <p>{{ post.body }}</p>
+                        <small>Posted on {{ post.created.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                    </div>
+                    </div>
+                    <div class="card-body">{{ post.body }}</div>
+
+                    <div class="card-footer">
+                        <a class="navbar-item" href="{{ url_for('posts.update', id=post.id) }}">Update</a>
+                        <a class="navbar-item" href="{{ url_for('posts.delete', id=post.id) }}">Delete</a>
+                    </div>
+
+                </div>
+                <br>
+                {% endfor %}
+        </div>
+    {% else %}
+        <p>You must be logged in to view this page.</p>
+        <a href="{{ url_for('accounts.login') }}">Login</a>
+    {% endif %}
+</div>
 {% endblock %}

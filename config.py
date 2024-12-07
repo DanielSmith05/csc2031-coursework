@@ -10,7 +10,18 @@ from datetime import datetime
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import pyotp
+from flask_qrcode import QRcode
+from flask_login import LoginManager, UserMixin, current_user
 app = Flask(__name__)
+
+qrcode = QRcode(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'accounts.login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 # SECRET KEY FOR FLASK FORMS
 app.config['SECRET_KEY'] = secrets.token_hex(16)
@@ -49,10 +60,12 @@ class Post(db.Model):
     body = db.Column(db.Text, nullable=False)
     user = db.relationship("User", back_populates="posts")
 
-    def __init__(self, title, body):
+
+    def __init__(self, title, body, user):
         self.created = datetime.now()
         self.title = title
         self.body = body
+        self.user = user
 
     def update(self, title, body):
         self.created = datetime.now()
@@ -60,7 +73,9 @@ class Post(db.Model):
         self.body = body
         db.session.commit()
 
-class User(db.Model):
+
+
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -74,11 +89,18 @@ class User(db.Model):
     lastname = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
 
-    mfa_key = db.Column(db.String(100), nullable=False, default=lambda: pyotp.random_base32())  # MFA Key
-    mfa_enabled = db.Column(db.Boolean, nullable=False, default=False)  # MFA enabled flag
+    #User mfa
+    mfa_key = db.Column(db.String(100), nullable=False, default=pyotp.random_base32())
+    mfa_enabled = db.Column(db.Boolean, nullable=False, default=False)
 
     # User posts
     posts = db.relationship("Post", order_by=Post.id, back_populates="user")
+
+    #User active
+    active = db.Column(db.Boolean(), nullable=False, default=True)
+
+    def get_id(self):
+        return str(self.id)
 
     def __init__(self, email, firstname, lastname, phone, password):
         self.email = email
@@ -93,6 +115,13 @@ class User(db.Model):
         self.mfa_enabled = True
         db.session.commit()
 
+    @property
+    def is_active(self):
+        return self.active
+
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
 
 
 

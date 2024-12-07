@@ -1,14 +1,18 @@
 import wtforms
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request
+from sqlalchemy.sql.functions import user
 
 from accounts.forms import RegistrationForm, LoginForm
 from config import User, db, limiter
 import re
-from markupsafe import Markup
 import pyotp
+from flask_login import login_user, logout_user, current_user
+
+
 
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
+
 
 
 @accounts_bp.route('/registration', methods=['GET', 'POST'])
@@ -24,17 +28,18 @@ def registration():
             flash('Invalid password format', category="danger")
             return render_template('accounts/registration.html', form=form)
         else:
-            user = User(email=form.email.data,
+            new_user = User(email=form.email.data,
                             firstname=form.firstname.data,
                             lastname=form.lastname.data,
                             phone=form.phone.data,
                             password=form.password.data)
 
-            db.session.add(user)
+            db.session.add(new_user)
             db.session.commit()
 
             flash('Account Created. Please set up MFA before logging in.', category='success')
-            return redirect(url_for('accounts.mfa_setup', user_id=user.id)) # Redirect to MFA setup page
+            return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
+
 
     return render_template('accounts/registration.html', form=form)
 @accounts_bp.route('/login', methods=['GET', 'POST'])
@@ -43,28 +48,48 @@ def login():
     form = LoginForm()
     if 'failed_attempts' not in session:
         session['failed_attempts'] = 0
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        db.session.query(User).filter_by(password=form.password.data).first()
 
-        if not user.mfa_enabled:
-            return redirect(url_for('accounts.mfa_setup', user_id=user.id)) # Redirect to MFA setup page
-        if (user is not None
-                and (form.email.data == user.email)
-                and (form.password.data == user.password)
-                and (pyotp.TOTP(user.mfa_key).verify(form.mfa_pin.data))):
-            flash('Login Successful.', 'success')
-            return render_template('posts/posts.html', form=form)
-        else:
+        if not user:
+            flash('Invalid credentials. Please try again.', category="danger")
+            return render_template('accounts/login.html', form=form)
+
+        # Check password
+        if user.password != form.password.data:
             session['failed_attempts'] += 1
+            remaining_attempts = 3 - session['failed_attempts']
             if session['failed_attempts'] >= 3:
-                flash('Login Unsuccessful', category="danger")
-                redirect(url_for('accounts.login'))
-                flash(Markup('<a href="/unlock">unlock account</a>'))
-                return render_template('accounts/login.html', form=form)
-            else:
-                flash(f'Login failed you have {3 - session['failed_attempts']} attempts left', category="danger")
+                current_user.is_active = False
+                flash('Too many failed attempts. Please unlock your account.', category="danger")
+                return redirect(url_for('accounts.unlock'))
+            flash(f'Incorrect password. {remaining_attempts} attempts left.', category="danger")
+            return render_template('accounts/login.html', form=form)
+
+        # Redirect to MFA setup if not enabled
+        if not user.mfa_enabled:
+            flash('MFA is not set up. Please set it up to continue.', category="warning")
+            return redirect(url_for('accounts.mfa_setup', mfa_key=user.mfa_key))
+
+        # MFA Check
+        if not pyotp.TOTP(user.mfa_key).verify(form.mfa_pin.data):
+            flash('Invalid MFA code. Please try again.', category="danger")
+            return render_template('accounts/login.html', form=form)
+
+        # Successful login
+        flash('Login successful!', 'success')
+        session.pop('failed_attempts', None)
+        login_user(user)  # Log in the user
+        return render_template('posts/posts.html')
+
     return render_template('accounts/login.html', form=form)
+
+@accounts_bp.route('/logout')
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('accounts.login'))
 
 @accounts_bp.route('/unlock')
 def unlock():
@@ -110,29 +135,34 @@ def verify_password(password):
 
     return True
 
-@accounts_bp.route('/mfa_setup/<int:user_id>', methods=['GET', 'POST'])
-def mfa_setup(user_id):
-    user = User.query.get_or_404(user_id)
+@accounts_bp.route('/mfa_setup/<string:mfa_key>', methods=['GET', 'POST'])
+def mfa_setup(mfa_key):
+    form = LoginForm()
+    user = User.query.filter_by(mfa_key=mfa_key).first()
+
+    if not user:
+        flash('Invalid MFA setup request. Please try again.', category='danger')
+        return redirect(url_for('accounts.login'))
 
     if request.method == 'POST':
         mfa_pin = request.form.get('mfa_pin')
-        # Validate MFA PIN
         totp = pyotp.TOTP(user.mfa_key)
         if totp.verify(mfa_pin):
-            user.enable_mfa()  # Enable MFA for the user
+            user.enable_mfa()
             flash('MFA setup successful! You can now log in using your MFA PIN.', category="success")
             return redirect(url_for('accounts.login'))
 
         flash('Invalid MFA PIN. Please try again.', category="danger")
 
-    # Show the user's MFA key
-    return render_template('accounts/mfa_setup.html', user=user)
-
-
-
-
+    return render_template(
+        'accounts/mfa_setup.html',
+        form=form,
+        user=user,
+        uri=str(pyotp.TOTP(user.mfa_key).provisioning_uri(user.email, 'application name'))
+    )
 
 
 @accounts_bp.route('/account')
 def account():
     return render_template('accounts/account.html')
+

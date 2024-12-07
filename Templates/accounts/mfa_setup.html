@@ -1,18 +1,57 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
+<div class="container">
     <h1>MFA Setup</h1>
-    <p>Follow these instructions to set up MFA:</p>
-    <ul>
-        <li>Download an authenticator app (e.g., Google Authenticator).</li>
-        <li>Scan the QR code or manually enter the MFA key.</li>
-    </ul>
-    <p>Your MFA key is: {{ user.mfa_key }}</p>
+    <div class="p-2 row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <div>
+                <p>Follow these instructions to set up MFA:</p>
+                <div>
+                    <p>Download an authenticator app (e.g., Google Authenticator).</p>
+                    <p>Scan the QR code or manually enter the MFA key.</p>
+                </div>
 
-    <form method="POST">
-        <label for="mfa_pin">Enter MFA PIN:</label>
-        <input type="text" id="mfa_pin" name="mfa_pin" required>
-        <button type="submit">Submit</button>
-    </form>
-    <a href="{{ url_for('accounts.login') }}">Back to Login</a>
+
+                <p>Your MFA key is: <span class="text-monospace">{{ user.mfa_key }}</span></p>
+            </div>
+            <form method="POST">
+                <div class="p-2 bg-light border border-primary">
+                    <div style="text-align: left">
+                        {{ form.csrf_token() }}
+
+                        <div class="form-group">
+                            {{ form.mfa_pin.label }}<span style="color: red">*</span>
+                            {{ form.mfa_pin(class="form-control") }}
+                        </div>
+                    </div>
+                    <div>
+                        {{ form.submit(class="btn btn-success") }}
+                    </div>
+                </div>
+            </form>
+            <div class="mt-3 text-center">
+                <img src="{{ qrcode(user.uri, box_size=5, border=5) }}">
+            </div>
+            <div class="mt-3 text-center">
+                <img src="{{ qrcode(uri, box_size=5, border=5) }}">
+            </div>
+            <div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3 alert-dismissible" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                            onclick=delete_flash(this)>
+                        <span></span>
+                    </button>
+                </div>
+                {% endfor %}
+                {% endwith %}
+            </div>
+        </div>
+        <div class="col-3"></div>
+    </div>
+</div>
 {% endblock %}
