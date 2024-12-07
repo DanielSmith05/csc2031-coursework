@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0fc71f9e-57de-4be2-ac27-e55f727d3ead" name="Changes" comment="excercise 12 sort of still need to work on posts.html">
+    <list default="true" id="0fc71f9e-57de-4be2-ac27-e55f727d3ead" name="Changes" comment="excercise 12 done">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Templates/accounts/account.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/accounts/account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Templates/posts/posts.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/posts/posts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/posts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/posts/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +145,8 @@
       <workItem from="1733356113375" duration="4330000" />
       <workItem from="1733360476486" duration="2930000" />
       <workItem from="1733413451569" duration="4807000" />
-      <workItem from="1733500053099" duration="21367000" />
+      <workItem from="1733500053099" duration="22058000" />
+      <workItem from="1733615295444" duration="434000" />
     </task>
     <task id="LOCAL-00001" summary="exercise 2">
       <option name="closed" value="true" />
@@ -228,7 +228,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733542104953</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="excercise 12 done">
+      <option name="closed" value="true" />
+      <created>1733543175794</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1733543175794</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -255,10 +263,11 @@
     <MESSAGE value="excercise 10" />
     <MESSAGE value="excercise 11 part 1" />
     <MESSAGE value="excercise 12 sort of still need to work on posts.html" />
-    <option name="LAST_COMMIT_MESSAGE" value="excercise 12 sort of still need to work on posts.html" />
+    <MESSAGE value="excercise 12 done" />
+    <option name="LAST_COMMIT_MESSAGE" value="excercise 12 done" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/csc2031_coursework$app.coverage" NAME="app Coverage Results" MODIFIED="1733543142197" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/csc2031_coursework$app.coverage" NAME="app Coverage Results" MODIFIED="1733615835277" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/csc2031_coursework$config.coverage" NAME="config Coverage Results" MODIFIED="1733016044058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

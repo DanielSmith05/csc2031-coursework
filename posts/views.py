@@ -32,18 +32,17 @@ def create():
 
 @posts_bp.route('/<int:id>/update', methods=('GET', 'POST'))
 def update(id):
-
     post_to_update = Post.query.filter_by(id=id).first()
 
-    if not post_to_update:
+    if not post_to_update or post_to_update.userid != current_user.id:
+        flash('You do not have permission to update this post.', category='danger')
         return redirect(url_for('posts.posts'))
 
     form = PostForm()
 
     if form.validate_on_submit():
         post_to_update.update(title=form.title.data, body=form.body.data)
-
-        flash('Post updated', category='success')
+        flash('Post updated successfully', category='success')
         return redirect(url_for('posts.posts'))
 
     form.title.data = post_to_update.title
@@ -53,9 +52,13 @@ def update(id):
 
 @posts_bp.route('/<int:id>/delete')
 def delete(id):
-    Post.query.filter_by(id=id).delete()
+    post_to_delete = Post.query.filter_by(id=id).first()
+
+    if not post_to_delete or post_to_delete.userid != current_user.id:
+        flash('You do not have permission to delete this post.', category='danger')
+        return redirect(url_for('posts.posts'))
+
+    db.session.delete(post_to_delete)
     db.session.commit()
-
-    flash('Post deleted', category='success')
+    flash('Post deleted successfully', category='success')
     return redirect(url_for('posts.posts'))
-
