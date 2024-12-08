@@ -123,8 +123,6 @@ class User(db.Model, UserMixin):
     def load_user(id):
         return User.query.get(int(id))
 
-    def is_authenticated(self):
-        return self.authenticated
 
 
 

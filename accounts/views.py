@@ -17,79 +17,94 @@ accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
 
 @accounts_bp.route('/registration', methods=['GET', 'POST'])
 def registration():
-    form = RegistrationForm()
+    if not current_user.is_authenticated:
+        form = RegistrationForm()
 
-    if form.validate_on_submit():
-        if User.query.filter_by(email=form.email.data).first():
-            flash('Email already exists', category="danger")
-            return render_template('accounts/registration.html', form=form)
+        if form.validate_on_submit():
+            if User.query.filter_by(email=form.email.data).first():
+                flash('Email already exists', category="danger")
+                return render_template('accounts/registration.html', form=form)
 
-        if not verify_password(form.password.data):
-            flash('Invalid password format', category="danger")
-            return render_template('accounts/registration.html', form=form)
-        else:
-            new_user = User(email=form.email.data,
-                            firstname=form.firstname.data,
-                            lastname=form.lastname.data,
-                            phone=form.phone.data,
-                            password=form.password.data)
+            if not verify_password(form.password.data):
+                flash('Invalid password format', category="danger")
+                return render_template('accounts/registration.html', form=form)
+            else:
+                new_user = User(email=form.email.data,
+                                firstname=form.firstname.data,
+                                lastname=form.lastname.data,
+                                phone=form.phone.data,
+                                password=form.password.data)
 
-            db.session.add(new_user)
-            db.session.commit()
+                db.session.add(new_user)
+                db.session.commit()
 
-            flash('Account Created. Please set up MFA before logging in.', category='success')
-            return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
+                flash('Account Created. Please set up MFA before logging in.', category='success')
+                return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
+
+        return render_template('accounts/registration.html', form=form)
+    else:
+        flash('already registered', category="danger")
+        return render_template('home/index.html')
 
 
-    return render_template('accounts/registration.html', form=form)
+
 @accounts_bp.route('/login', methods=['GET', 'POST'])
 @limiter.limit('5/minute')
 def login():
-    form = LoginForm()
-    if 'failed_attempts' not in session:
-        session['failed_attempts'] = 0
+    if not current_user.is_authenticated:
+        form = LoginForm()
+        if 'failed_attempts' not in session:
+            session['failed_attempts'] = 0
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
 
-        if not user:
-            flash('Invalid credentials. Please try again.', category="danger")
-            return render_template('accounts/login.html', form=form)
+            if not user:
+                flash('Invalid credentials. Please try again.', category="danger")
+                return render_template('accounts/login.html', form=form)
 
-        # Check password
-        if user.password != form.password.data:
-            session['failed_attempts'] += 1
-            remaining_attempts = 3 - session['failed_attempts']
-            if session['failed_attempts'] >= 3:
-                current_user.is_active = False
-                flash('Too many failed attempts. Please unlock your account.', category="danger")
-                return redirect(url_for('accounts.unlock'))
-            flash(f'Incorrect password. {remaining_attempts} attempts left.', category="danger")
-            return render_template('accounts/login.html', form=form)
+            # Check password
+            if user.password != form.password.data:
+                session['failed_attempts'] += 1
+                remaining_attempts = 3 - session['failed_attempts']
+                if session['failed_attempts'] >= 3:
+                    current_user.is_active = False
+                    flash('Too many failed attempts. Please unlock your account.', category="danger")
+                    return redirect(url_for('accounts.unlock'))
+                flash(f'Incorrect password. {remaining_attempts} attempts left.', category="danger")
+                return render_template('accounts/login.html', form=form)
 
-        # Redirect to MFA setup if not enabled
-        if not user.mfa_enabled:
-            flash('MFA is not set up. Please set it up to continue.', category="warning")
-            return redirect(url_for('accounts.mfa_setup', mfa_key=user.mfa_key))
+            # Redirect to MFA setup if not enabled
+            if not user.mfa_enabled:
+                flash('MFA is not set up. Please set it up to continue.', category="warning")
+                return redirect(url_for('accounts.mfa_setup', mfa_key=user.mfa_key))
 
-        # MFA Check
-        if not pyotp.TOTP(user.mfa_key).verify(form.mfa_pin.data):
-            flash('Invalid MFA code. Please try again.', category="danger")
-            return render_template('accounts/login.html', form=form)
+            # MFA Check
+            if not pyotp.TOTP(user.mfa_key).verify(form.mfa_pin.data):
+                flash('Invalid MFA code. Please try again.', category="danger")
+                return render_template('accounts/login.html', form=form)
 
-        # Successful login
-        flash('Login successful!', 'success')
-        session.pop('failed_attempts', None)
-        login_user(user)  # Log in the user
-        return render_template('posts/posts.html')
+            # Successful login
+            flash('Login successful!', 'success')
+            session.pop('failed_attempts', None)
+            login_user(user)  # Log in the user
+            return render_template('posts/posts.html')
 
-    return render_template('accounts/login.html', form=form)
+        return render_template('accounts/login.html', form=form)
+    else:
+        flash('already logged in', category="danger")
+        return render_template('home/index.html')
+
 
 @accounts_bp.route('/logout')
 def logout():
-    logout_user()
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('accounts.login'))
+    if current_user.is_authenticated:
+        logout_user()
+        flash('You have been logged out.', 'success')
+        return redirect(url_for('accounts.login'))
+    else:
+        flash('You are not logged in', category="danger")
+        return redirect(url_for('accounts.login'))
 
 @accounts_bp.route('/unlock')
 def unlock():
@@ -164,5 +179,9 @@ def mfa_setup(mfa_key):
 
 @accounts_bp.route('/account')
 def account():
-    return render_template('accounts/account.html')
+    if current_user.is_authenticated:
+        return render_template('accounts/account.html')
+    else:
+        flash('You are not logged in', category="danger")
+        return redirect(url_for('accounts.login'))
 
