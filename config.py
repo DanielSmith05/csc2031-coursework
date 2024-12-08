@@ -12,6 +12,7 @@ from flask_limiter.util import get_remote_address
 import pyotp
 from flask_qrcode import QRcode
 from flask_login import LoginManager, UserMixin, current_user
+from flask_admin.theme import Bootstrap4Theme
 app = Flask(__name__)
 
 qrcode = QRcode(app)
@@ -99,15 +100,19 @@ class User(db.Model, UserMixin):
     #User active
     active = db.Column(db.Boolean(), nullable=False, default=True)
 
+    # User role
+    role = db.Column(db.String(20), nullable=False, default='end_user')
+
     def get_id(self):
         return str(self.id)
 
-    def __init__(self, email, firstname, lastname, phone, password):
+    def __init__(self, email, firstname, lastname, phone, password, role):
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
         self.phone = phone
         self.password = password
+        self.role = role
 
 
     def enable_mfa(self):
@@ -119,12 +124,10 @@ class User(db.Model, UserMixin):
     def is_active(self):
         return self.active
 
-    @login_manager.user_loader
-    def load_user(id):
-        return User.query.get(int(id))
 
-
-
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 
 # DATABASE ADMINISTRATOR
@@ -140,9 +143,9 @@ class PostView(ModelView):
 class UserView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
-    column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'mfa_key', 'mfa_enabled', 'posts')
+    column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'mfa_key', 'mfa_enabled', 'posts', 'role')
 
-admin = Admin(app, name='DB Admin', template_mode='bootstrap4')
+admin = Admin(app, name='DB Admin', theme=Bootstrap4Theme(fluid=True))
 admin._menu = admin._menu[1:]
 admin.add_link(MainIndexLink(name='Home Page'))
 admin.add_view(PostView(Post, db.session))

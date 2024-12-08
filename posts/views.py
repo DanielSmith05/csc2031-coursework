@@ -10,32 +10,43 @@ posts_bp = Blueprint('posts', __name__, template_folder='templates')
 
 @posts_bp.route('/posts')
 def posts():
-    if current_user.is_authenticated:
-        all_posts = Post.query.order_by(desc('id')).all()
-        return render_template('posts/posts.html', posts=all_posts)
+    if current_user.role == 'end_user':
+        if current_user.is_authenticated:
+            all_posts = Post.query.order_by(desc('id')).all()
+            return render_template('posts/posts.html', posts=all_posts)
+        else:
+            flash('You are not logged in.', category='danger')
+            return redirect(url_for('accounts.login'))
     else:
-        flash('You are not logged in.', category='danger')
+        flash('You are authorised to access this page', category="danger")
         return redirect(url_for('accounts.login'))
+
+
 
 @posts_bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
-    if current_user.is_authenticated:
-        form = PostForm()
+    if current_user.role == 'end_user':
+        if current_user.is_authenticated:
+            form = PostForm()
 
-        if form.validate_on_submit():
-            new_post = Post(user=current_user, title=form.title.data, body=form.body.data)
+            if form.validate_on_submit():
+                new_post = Post(user=current_user, title=form.title.data, body=form.body.data)
 
-            db.session.add(new_post)
-            db.session.commit()
+                db.session.add(new_post)
+                db.session.commit()
 
-            flash('Post created', category='success')
-            return redirect(url_for('posts.posts'))
+                flash('Post created', category='success')
+                return redirect(url_for('posts.posts'))
 
-        return render_template('posts/create.html', form=form)
+            return render_template('posts/create.html', form=form)
+        else:
+            flash('you are not logged in', category='danger')
+            return redirect(url_for('accounts.login'))
     else:
-        flash('you are not logged in', category='danger')
+        flash('You are authorised to access this page', category="danger")
         return redirect(url_for('accounts.login'))
+
 
 
 @posts_bp.route('/<int:id>/update', methods=('GET', 'POST'))

@@ -33,7 +33,8 @@ def registration():
                                 firstname=form.firstname.data,
                                 lastname=form.lastname.data,
                                 phone=form.phone.data,
-                                password=form.password.data)
+                                password=form.password.data,
+                                role='end_user')
 
                 db.session.add(new_user)
                 db.session.commit()
@@ -49,7 +50,7 @@ def registration():
 
 
 @accounts_bp.route('/login', methods=['GET', 'POST'])
-@limiter.limit('5/minute')
+@limiter.limit('10/minute')
 def login():
     if not current_user.is_authenticated:
         form = LoginForm()
@@ -88,7 +89,12 @@ def login():
             flash('Login successful!', 'success')
             session.pop('failed_attempts', None)
             login_user(user)  # Log in the user
-            return render_template('posts/posts.html')
+            if user.role == 'end_user':
+                return render_template('posts/posts.html')
+            elif user.role == 'db_admin':
+                return redirect('http://127.0.0.1:5000/admin')
+            elif user.role == 'sec_admin':
+                return render_template('security/security.html')
 
         return render_template('accounts/login.html', form=form)
     else:
@@ -179,9 +185,15 @@ def mfa_setup(mfa_key):
 
 @accounts_bp.route('/account')
 def account():
-    if current_user.is_authenticated:
-        return render_template('accounts/account.html')
+    if current_user.role == 'end_user':
+        if current_user.is_authenticated:
+            return render_template('accounts/account.html')
+        else:
+            flash('You are not logged in', category="danger")
+            return redirect(url_for('accounts.login'))
     else:
-        flash('You are not logged in', category="danger")
+        flash('You are authorised to access this page', category="danger")
         return redirect(url_for('accounts.login'))
+
+
 
