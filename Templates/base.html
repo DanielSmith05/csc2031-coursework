@@ -24,10 +24,10 @@
         <a class="nav-item nav-link" href="{{ url_for('accounts.registration') }}">Registration</a>
         <a class="nav-item nav-link" href="{{ url_for('accounts.login') }}">Login</a>
         {% else %}
+        <a class="nav-item nav-link" href="{{ url_for('accounts.account') }}">Account</a>
         <a class="nav-item nav-link" href="{{ url_for('accounts.logout') }}">Logout</a>
         {% endif %}
         {% if current_user.role == "end_user" %}
-        <a class="nav-item nav-link" href="{{ url_for('accounts.account') }}">Account</a>
         <a class="nav-item nav-link" href="{{ url_for('posts.create') }}">Create Posts</a>
         <a class="nav-item nav-link" href="{{ url_for('posts.posts') }}">View Posts</a>
         {% endif %}

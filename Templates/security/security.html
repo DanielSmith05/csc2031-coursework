@@ -1,5 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Security</h1>
+    <div class="container mt-5">
+        <h1>User Logs</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Registration Date/Time</th>
+                    <th>Latest Login</th>
+                    <th>Previous Login</th>
+                    <th>Latest IP</th>
+                    <th>Previous IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id if user.log else 'N/A' }}</td>
+                    <td>{{ user.email if user.log else 'N/A' }}</td>
+                    <td>{{ user.log.user_registration_datetime if user.log else 'N/A' }}</td>
+                    <td>{{ user.log.latest_login_datetime if user.log else 'N/A' }}</td>
+                    <td>{{ user.log.previous_login_datetime if user.log else 'N/A' }}</td>
+                    <td>{{ user.log.latest_ip if user.log else 'N/A' }}</td>
+                    <td>{{ user.log.previous_ip if user.log else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

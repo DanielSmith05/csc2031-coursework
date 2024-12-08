@@ -1,5 +1,6 @@
 import wtforms
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request
+from datetime import datetime
 from sqlalchemy.sql.functions import user
 
 from accounts.forms import RegistrationForm, LoginForm
@@ -38,6 +39,8 @@ def registration():
 
                 db.session.add(new_user)
                 db.session.commit()
+
+                new_user.generate_log()
 
                 flash('Account Created. Please set up MFA before logging in.', category='success')
                 return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
@@ -86,6 +89,15 @@ def login():
                 return render_template('accounts/login.html', form=form)
 
             # Successful login
+            log = user.log
+            current_ip = request.remote_addr
+
+            log.previous_login_datetime = log.latest_login_datetime
+            log.previous_ip = log.latest_ip
+
+            log.latest_login_datetime = datetime.now()
+            log.latest_ip = current_ip
+            db.session.commit()
             flash('Login successful!', 'success')
             session.pop('failed_attempts', None)
             login_user(user)  # Log in the user
@@ -94,7 +106,7 @@ def login():
             elif user.role == 'db_admin':
                 return redirect('http://127.0.0.1:5000/admin')
             elif user.role == 'sec_admin':
-                return render_template('security/security.html')
+                return render_template('home/index.html')
 
         return render_template('accounts/login.html', form=form)
     else:
@@ -185,15 +197,12 @@ def mfa_setup(mfa_key):
 
 @accounts_bp.route('/account')
 def account():
-    if current_user.role == 'end_user':
-        if current_user.is_authenticated:
-            return render_template('accounts/account.html')
-        else:
-            flash('You are not logged in', category="danger")
-            return redirect(url_for('accounts.login'))
+    if current_user.is_authenticated:
+        return render_template('accounts/account.html')
     else:
-        flash('You are authorised to access this page', category="danger")
+        flash('You are not logged in', category="danger")
         return redirect(url_for('accounts.login'))
+
 
 
 

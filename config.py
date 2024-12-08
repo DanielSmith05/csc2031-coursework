@@ -74,7 +74,22 @@ class Post(db.Model):
         self.body = body
         db.session.commit()
 
+class Log(db.Model):
+    __tablename__ = 'logs'
 
+    id = db.Column(db.Integer, primary_key=True)
+    log_user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_registration_datetime = db.Column(db.DateTime, nullable=False)
+    latest_login_datetime = db.Column(db.DateTime)
+    previous_login_datetime = db.Column(db.DateTime)
+    latest_ip = db.Column(db.String(45))  # IPv6 compatible
+    previous_ip = db.Column(db.String(45))
+
+    user = db.relationship("User", back_populates="log", uselist=False)
+
+    def __init__(self, user_id):
+        self.log_user_id = user_id
+        self.user_registration_datetime = datetime.now()
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -103,6 +118,9 @@ class User(db.Model, UserMixin):
     # User role
     role = db.Column(db.String(20), nullable=False, default='end_user')
 
+    # User log
+    log = db.relationship("Log", uselist=False, back_populates="user")
+
     def get_id(self):
         return str(self.id)
 
@@ -124,6 +142,11 @@ class User(db.Model, UserMixin):
     def is_active(self):
         return self.active
 
+    def generate_log(self):
+        if not self.log:
+            log = Log(user_id=self.id)
+            db.session.add(log)
+            db.session.commit()
 
 @login_manager.user_loader
 def load_user(id):
@@ -145,11 +168,18 @@ class UserView(ModelView):
     column_hide_backrefs = False
     column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'mfa_key', 'mfa_enabled', 'posts', 'role')
 
+class LogView(ModelView):
+    column_display_pk = True
+    column_hide_backrefs = False
+    column_list = ('id', 'log_user_id', 'user_registration_datetime', 'latest_login_datetime',
+                   'previous_login_datetime', 'latest_ip', 'previous_ip')
+
 admin = Admin(app, name='DB Admin', theme=Bootstrap4Theme(fluid=True))
 admin._menu = admin._menu[1:]
 admin.add_link(MainIndexLink(name='Home Page'))
 admin.add_view(PostView(Post, db.session))
 admin.add_view(UserView(User, db.session))
+admin.add_view(LogView(Log, db.session))
 
 
 limiter = Limiter(get_remote_address, app=app)
