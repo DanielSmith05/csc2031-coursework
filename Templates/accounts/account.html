@@ -13,7 +13,7 @@
             <p><strong>Last Name:</strong> {{ current_user.lastname }}</p>
             <p><strong>Phone Number:</strong> {{ current_user.phone }}</p>
         </div>
-
+        {% if current_user.role == "end_user" %}
         <div class="user-posts">
             <h2>Your Posts</h2>
             {% for post in current_user.posts %}
@@ -28,12 +28,14 @@
                 <div class="card-body">
                     <p>{{ post.body }}</p>
                 </div>
+
                 <div class="card-footer">
                     <a href="{{ url_for('posts.update', id=post.id) }}">Update</a>
                     <a href="{{ url_for('posts.delete', id=post.id) }}">Delete</a>
                 </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+            {% endif %}
         </div>
     {% else %}
         <p>You must be logged in to view this page.</p>

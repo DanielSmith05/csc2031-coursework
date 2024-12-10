@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request
+from flask import Flask, url_for, request, abort
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
@@ -184,17 +184,35 @@ class PostView(ModelView):
     column_hide_backrefs = False
     column_list = ('id', 'userid', 'created', 'title', 'body', 'user')
 
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'db_admin'
+
+    def inaccessible_callback(self, name, **kwargs):
+        abort(403)
+
 
 class UserView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
     column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'mfa_key', 'mfa_enabled', 'posts', 'role')
 
+    #def is_accessible(self):
+    #    return current_user.is_authenticated and current_user.role == 'db_admin'
+
+    #def inaccessible_callback(self, name, **kwargs):
+    #    abort(403)
+
 class LogView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
     column_list = ('id', 'log_user_id', 'user_registration_datetime', 'latest_login_datetime',
                    'previous_login_datetime', 'latest_ip', 'previous_ip')
+
+    #def is_accessible(self):
+    #    return current_user.is_authenticated and current_user.role == 'db_admin'
+
+    #def inaccessible_callback(self, name, **kwargs):
+    #    abort(403)
 
 admin = Admin(app, name='DB Admin', theme=Bootstrap4Theme(fluid=True))
 admin._menu = admin._menu[1:]
