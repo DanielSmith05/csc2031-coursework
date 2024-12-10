@@ -1,7 +1,6 @@
-from flask import Blueprint, render_template, flash, url_for, redirect
+from flask import Blueprint, render_template, flash, url_for, redirect, request
 from flask_login import login_required
-
-from config import db, Post
+from config import db, Post, security_logger
 from posts.forms import PostForm
 from sqlalchemy import desc
 from flask_login import current_user
@@ -18,8 +17,10 @@ def posts():
             flash('You are not logged in.', category='danger')
             return redirect(url_for('accounts.login'))
     else:
-        flash('You are authorised to access this page', category="danger")
-        return redirect(url_for('accounts.login'))
+        security_logger.warning(
+            f"Unauthorized role access attempt: Email={current_user.email}, Role={current_user.role}, URL={request.url}, IP={request.remote_addr}")
+        flash('You are not authorised to access that page', category="danger")
+        return render_template('home/index.html')
 
 
 
@@ -35,6 +36,8 @@ def create():
 
                 db.session.add(new_post)
                 db.session.commit()
+                security_logger.info(
+                    f"Post creation: Email={current_user.email}, Role={current_user.role}, PostID={new_post.id}, IP={request.remote_addr}")
 
                 flash('Post created', category='success')
                 return redirect(url_for('posts.posts'))
@@ -44,8 +47,10 @@ def create():
             flash('you are not logged in', category='danger')
             return redirect(url_for('accounts.login'))
     else:
-        flash('You are authorised to access this page', category="danger")
-        return redirect(url_for('accounts.login'))
+        security_logger.warning(
+            f"Unauthorized role access attempt: Email={current_user.email}, Role={current_user.role}, URL={request.url}, IP={request.remote_addr}")
+        flash('You are not authorised to access that page', category="danger")
+        return render_template('home/index.html')
 
 
 
@@ -67,6 +72,8 @@ def update(id):
 
         form.title.data = post_to_update.title
         form.body.data = post_to_update.body
+        security_logger.info(
+            f"Post update: Email={current_user.email}, Role={current_user.role}, PostID={post_to_update.id}, AuthorEmail={post_to_update.user.email}, IP={request.remote_addr}")
 
         return render_template('posts/update.html', form=form)
     else:
@@ -85,9 +92,11 @@ def delete(id):
 
         db.session.delete(post_to_delete)
         db.session.commit()
+        security_logger.info(
+            f"Post deletion: Email={current_user.email}, Role={current_user.role}, PostID={post_to_delete.id}, AuthorEmail={post_to_delete.user.email}, IP={request.remote_addr}")
         flash('Post deleted successfully', category='success')
         return redirect(url_for('posts.posts'))
     else:
         flash('You do not have permission to delete this post.', category='danger')
-        return render_template('home/index.html')
+        return render_template('posts/posts.html')
 

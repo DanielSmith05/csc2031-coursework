@@ -15,6 +15,7 @@ Flask-WTF
 Flask-Admin
 Flask-Limiter
 flask-qrcode
+flask-bcrypt
 WTForms
 
 pyotp

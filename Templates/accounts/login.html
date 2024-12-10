@@ -28,7 +28,7 @@
                             {{ form.mfa_pin(class="form-control") }}
                         </div>
                         <div>
-                            Render - <div class="form-group">{{ form.recaptcha }}</div>
+                            <div class="form-group">{{ form.recaptcha }}</div>
                         </div>
 
                     </div>
@@ -45,7 +45,7 @@
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"
                             onclick=delete_flash(this)>
-                        <span></span>
+                        <span>&times;</span>
                     </button>
                 </div>
                 {% endfor %}

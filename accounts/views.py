@@ -1,19 +1,16 @@
-import wtforms
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from datetime import datetime
-from sqlalchemy.sql.functions import user
-
+from markupsafe import Markup
 from accounts.forms import RegistrationForm, LoginForm
-from config import User, db, limiter
+from config import User, db, limiter, security_logger, bcrypt
 import re
 import pyotp
 from flask_login import login_user, logout_user, current_user
-
+from flask_bcrypt import Bcrypt
 
 
 
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
-
 
 
 @accounts_bp.route('/registration', methods=['GET', 'POST'])
@@ -30,17 +27,21 @@ def registration():
                 flash('Invalid password format', category="danger")
                 return render_template('accounts/registration.html', form=form)
             else:
+                hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
                 new_user = User(email=form.email.data,
                                 firstname=form.firstname.data,
                                 lastname=form.lastname.data,
                                 phone=form.phone.data,
-                                password=form.password.data,
+                                password=hashed_password,
                                 role='end_user')
 
                 db.session.add(new_user)
                 db.session.commit()
 
+
                 new_user.generate_log()
+                security_logger.info(
+                    f"User registration: Email={new_user.email}, Role={new_user.role}, IP={request.remote_addr}")
 
                 flash('Account Created. Please set up MFA before logging in.', category='success')
                 return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
@@ -68,13 +69,18 @@ def login():
                 return render_template('accounts/login.html', form=form)
 
             # Check password
-            if user.password != form.password.data:
+            if not bcrypt.check_password_hash(user.password, form.password.data):
                 session['failed_attempts'] += 1
                 remaining_attempts = 3 - session['failed_attempts']
+                security_logger.warning(
+                    f"Invalid login attempt: Email={form.email.data}, Attempts={session['failed_attempts']}, IP={request.remote_addr}")
                 if session['failed_attempts'] >= 3:
                     current_user.is_active = False
+                    security_logger.error(
+                        f"Maximum invalid login attempts reached: Email={form.email.data}, Attempts={session['failed_attempts']}, IP={request.remote_addr}")
                     flash('Too many failed attempts. Please unlock your account.', category="danger")
-                    return redirect(url_for('accounts.unlock'))
+                    flash(Markup('<a href="/unlock">unlock account</a>'))
+                    return render_template('accounts/login.html')
                 flash(f'Incorrect password. {remaining_attempts} attempts left.', category="danger")
                 return render_template('accounts/login.html', form=form)
 
@@ -86,21 +92,30 @@ def login():
             # MFA Check
             if not pyotp.TOTP(user.mfa_key).verify(form.mfa_pin.data):
                 flash('Invalid MFA code. Please try again.', category="danger")
+                security_logger.warning(
+                    f"Invalid login attempt: Email={form.email.data}, Attempts={session['failed_attempts']}, IP={request.remote_addr}")
                 return render_template('accounts/login.html', form=form)
 
-            # Successful login
-            log = user.log
+            if not user.log:
+                user.generate_log()
+
             current_ip = request.remote_addr
 
-            log.previous_login_datetime = log.latest_login_datetime
-            log.previous_ip = log.latest_ip
+            user.log.previous_login_datetime = user.log.latest_login_datetime
+            user.log.previous_ip = user.log.latest_ip
 
-            log.latest_login_datetime = datetime.now()
-            log.latest_ip = current_ip
+            user.log.latest_login_datetime = datetime.now()
+            user.log.latest_ip = current_ip
+            security_logger.info(f"User login: Email={user.email}, Role={user.role}, IP={request.remote_addr}")
             db.session.commit()
+
+
             flash('Login successful!', 'success')
             session.pop('failed_attempts', None)
-            login_user(user)  # Log in the user
+
+            login_user(user)
+
+
             if user.role == 'end_user':
                 return render_template('posts/posts.html')
             elif user.role == 'db_admin':
@@ -191,7 +206,7 @@ def mfa_setup(mfa_key):
         'accounts/mfa_setup.html',
         form=form,
         user=user,
-        uri=str(pyotp.TOTP(user.mfa_key).provisioning_uri(user.email, 'application name'))
+        uri=str(pyotp.TOTP(user.mfa_key).provisioning_uri(user.email, 'csc 2031 blog'))
     )
 
 

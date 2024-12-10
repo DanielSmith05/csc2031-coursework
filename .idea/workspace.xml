@@ -4,13 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0fc71f9e-57de-4be2-ac27-e55f727d3ead" name="Changes" comment="excercise 14">
+    <list default="true" id="0fc71f9e-57de-4be2-ac27-e55f727d3ead" name="Changes" comment="excercise 15 part 1">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Templates/posts/update.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/posts/update.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates/accounts/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/accounts/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates/accounts/mfa_setup.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/accounts/mfa_setup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates/home/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/home/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Templates/posts/create.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/posts/create.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Templates/security/security.html" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/security/security.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/accounts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/accounts/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/posts/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/posts/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/security/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/security/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -151,7 +155,12 @@
       <workItem from="1733413451569" duration="4807000" />
       <workItem from="1733500053099" duration="22058000" />
       <workItem from="1733615295444" duration="5510000" />
-      <workItem from="1733676121374" duration="6953000" />
+      <workItem from="1733676121374" duration="15463000" />
+      <workItem from="1733763197357" duration="9702000" />
+      <workItem from="1733844875138" duration="4212000" />
+      <workItem from="1733862449334" duration="413000" />
+      <workItem from="1733866466096" duration="1266000" />
+      <workItem from="1733868220801" duration="18000" />
     </task>
     <task id="LOCAL-00001" summary="exercise 2">
       <option name="closed" value="true" />
@@ -265,7 +274,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733620825163</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="excercise 15 part 1">
+      <option name="closed" value="true" />
+      <created>1733697481349</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1733697481349</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -296,10 +313,11 @@
     <MESSAGE value="excercise 13 done" />
     <MESSAGE value="excercise 13 done fr this time" />
     <MESSAGE value="excercise 14" />
-    <option name="LAST_COMMIT_MESSAGE" value="excercise 14" />
+    <MESSAGE value="excercise 15 part 1" />
+    <option name="LAST_COMMIT_MESSAGE" value="excercise 15 part 1" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/csc2031_coursework$app.coverage" NAME="app Coverage Results" MODIFIED="1733697275443" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/csc2031_coursework$app.coverage" NAME="app Coverage Results" MODIFIED="1733867813858" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/csc2031_coursework$config.coverage" NAME="config Coverage Results" MODIFIED="1733016044058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

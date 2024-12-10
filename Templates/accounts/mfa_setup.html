@@ -32,9 +32,6 @@
                 </div>
             </form>
             <div class="mt-3 text-center">
-                <img src="{{ qrcode(user.uri, box_size=5, border=5) }}">
-            </div>
-            <div class="mt-3 text-center">
                 <img src="{{ qrcode(uri, box_size=5, border=5) }}">
             </div>
             <div>
@@ -44,7 +41,7 @@
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"
                             onclick=delete_flash(this)>
-                        <span></span>
+                        <span>&times;</span>
                     </button>
                 </div>
                 {% endfor %}

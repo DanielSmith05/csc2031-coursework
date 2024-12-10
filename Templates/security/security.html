@@ -4,6 +4,19 @@
     <div class="container mt-5">
         <h1>User Logs</h1>
         <table class="table table-striped">
+            <div>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                               <div style="text-align: left" class="alert alert-{{ category }} mt-3 alert-dismissible" role="alert">
+                                   {{ message }}
+                                   <button type="button" class="btn-close" data-bs-dismiss="alert" onclick=delete_flash(this)>
+                                       <span>&times;</span>
+                                   </button>
+                               </div>
+
+                        {% endfor %}
+                    {% endwith %}
+                </div>
             <thead>
                 <tr>
                     <th>User ID</th>
@@ -20,11 +33,26 @@
                 <tr>
                     <td>{{ user.id if user.log else 'N/A' }}</td>
                     <td>{{ user.email if user.log else 'N/A' }}</td>
-                    <td>{{ user.log.user_registration_datetime if user.log else 'N/A' }}</td>
-                    <td>{{ user.log.latest_login_datetime if user.log else 'N/A' }}</td>
-                    <td>{{ user.log.previous_login_datetime if user.log else 'N/A' }}</td>
+                    <td>{{ user.log.user_registration_datetime.strftime('%Y-%m-%d %H:%M:%S') if user.log and user.log.user_registration_datetime else 'N/A' }}</td>
+                    <td>{{ user.log.latest_login_datetime.strftime('%Y-%m-%d %H:%M:%S') if user.log and user.log.latest_login_datetime else 'N/A' }}</td>
+                    <td>{{ user.log.previous_login_datetime.strftime('%Y-%m-%d %H:%M:%S') if user.log and user.log.previous_login_datetime else 'N/A' }}</td>
                     <td>{{ user.log.latest_ip if user.log else 'N/A' }}</td>
                     <td>{{ user.log.previous_ip if user.log else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2>Recent Security Events</h2>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Log Entry</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -13,11 +13,32 @@ import pyotp
 from flask_qrcode import QRcode
 from flask_login import LoginManager, UserMixin, current_user
 from flask_admin.theme import Bootstrap4Theme
+import logging
+from logging.handlers import RotatingFileHandler
+from flask_bcrypt import Bcrypt
+
 app = Flask(__name__)
+
+bcrypt = Bcrypt(app)
 
 qrcode = QRcode(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'accounts.login'
+
+# Configure the security logger
+security_logger = logging.getLogger("security")
+security_logger.setLevel(logging.INFO)
+
+# File handler to append to security.log
+file_handler = RotatingFileHandler("security.log", maxBytes=500000, backupCount=5)
+file_handler.setLevel(logging.INFO)
+
+# Create formatter without milliseconds
+formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+file_handler.setFormatter(formatter)
+
+# Add the handler to the logger
+security_logger.addHandler(file_handler)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -162,6 +183,7 @@ class PostView(ModelView):
     column_display_pk = True
     column_hide_backrefs = False
     column_list = ('id', 'userid', 'created', 'title', 'body', 'user')
+
 
 class UserView(ModelView):
     column_display_pk = True
