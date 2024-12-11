@@ -64,7 +64,7 @@ def registration():
                 return render_template('accounts/registration.html', form=form)
 
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-            salt = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
+            salt = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()[:32]
             new_user = User(email=form.email.data,
                             firstname=form.firstname.data,
                             lastname=form.lastname.data,
@@ -151,7 +151,7 @@ def login():
             flash('Login successful!', 'success')
             session.pop('failed_attempts', None)
 
-            login_user(user)
+            login_user(user, remember=False)
 
 
             if user.role == 'end_user':

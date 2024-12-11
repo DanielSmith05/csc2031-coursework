@@ -1,8 +1,27 @@
 from config import app
-from flask import render_template
+from flask import render_template, request, url_for, redirect
 from werkzeug.exceptions import TooManyRequests
 
+# Define attack indicators
+ATTACK_PATTERNS = {
+    "SQL Injection": ["union", "select", "insert", "drop", "alter", ";", "`", "'"],
+    "XSS": ["<script>", "<iframe>", "%3Cscript%3E", "%3Ciframe%3E"],
+    "Path Traversal": ["../", "..", "%2e%2e%2f", "%2e%2e/", "..%2f"],
+}
 
+@app.before_request
+def detect_attack():
+    # Check the path and query string for attack patterns
+    request_data = f"{request.path} {request.query_string.decode()}"
+    for attack_type, patterns in ATTACK_PATTERNS.items():
+        if any(pattern in request_data.lower() for pattern in patterns):
+            return redirect(url_for("error", attack_type=attack_type))
+    return None
+
+@app.route('/error')
+def error():
+    attack_type = request.args.get('attack_type', 'Unknown Attack')
+    return render_template('errors/Attack.html', attack_type=attack_type)
 @app.route('/')
 def index():
     return render_template('home/index.html')
@@ -30,6 +49,8 @@ def internal_server_error(error):
 def not_implemented(error):
     return render_template('errors/error.html', error_code=501, error_message="Not Implemented",
                            description="The server does not recognize the request method or lacks the ability to fulfill it."), 501
+
+
 
 if __name__ == '__main__':
     app.run()

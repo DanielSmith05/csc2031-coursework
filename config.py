@@ -21,6 +21,10 @@ from logging.handlers import RotatingFileHandler
 from flask_bcrypt import Bcrypt
 from cryptography.fernet import Fernet
 from hashlib import scrypt
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 app = Flask(__name__)
 
@@ -49,19 +53,20 @@ security_logger.addHandler(file_handler)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
 # SECRET KEY FOR FLASK FORMS
 app.config['SECRET_KEY'] = secrets.token_hex(16)
 
-# DATABASE CONFIGURATION
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///csc2031blog.db'
-app.config['SQLALCHEMY_ECHO'] = True
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# DATABASE CONFIGURATION (from .env file)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config['SQLALCHEMY_ECHO'] = os.getenv('SQLALCHEMY_ECHO', 'False') == 'True'  # Default to False if not provided
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS', 'False') == 'True'
 
-# CAPTCHA CONFIGURATION
-app.config['RECAPTCHA_USE_SSL'] = False
-app.config['RECAPTCHA_PUBLIC_KEY'] = "6LcEQpAqAAAAAJuGiMF9F6Fevk-lG8b4WueXpgc_"
-app.config['RECAPTCHA_PRIVATE_KEY'] = "6LcEQpAqAAAAAGyXUM3uPXyKcRDE9ww8wWbUhUwS"
+# CAPTCHA CONFIGURATION (from .env file)
+app.config['RECAPTCHA_USE_SSL'] = os.getenv('RECAPTCHA_USE_SSL', 'False') == 'True'
+app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
+app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
+
+
 
 metadata = MetaData(
     naming_convention={
@@ -102,9 +107,9 @@ class Post(db.Model):
 
     def encrypt_data(self):
         key = self.user.generate_encryption_key()
-        cipher = Fernet(key)
-        self.title = cipher.encrypt(self.title.encode()).decode()
-        self.body = cipher.encrypt(self.body.encode()).decode()
+        fernet = Fernet(key)
+        self.title = fernet.encrypt(self.title.encode()).decode()
+        self.body = fernet.encrypt(self.body.encode()).decode()
 
     def decrypt_text(self, encrypted_text, user):
         fernet_key = user.generate_encryption_key()
@@ -181,12 +186,12 @@ class User(db.Model, UserMixin):
         self.salt = salt
 
     def generate_encryption_key(self):
-        raw_key = scrypt(
+        key = scrypt(
             password=self.password.encode(),
             salt=base64.urlsafe_b64decode(self.salt.encode()),
             n=2048, r=8, p=1, dklen=32
         )
-        fernet_key = base64.urlsafe_b64encode(raw_key)
+        fernet_key = base64.urlsafe_b64encode(key)
         return fernet_key
 
     def enable_mfa(self):

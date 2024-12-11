@@ -58,25 +58,38 @@ def create():
 @posts_bp.route('/<int:id>/update', methods=('GET', 'POST'))
 def update(id):
     if current_user.is_authenticated:
+        # Fetch the post to update
         post_to_update = Post.query.filter_by(id=id).first()
 
+        # Check if the post exists and belongs to the current user
         if not post_to_update or post_to_update.userid != current_user.id:
             flash('You do not have permission to update this post.', category='danger')
             return redirect(url_for('posts.posts'))
 
         form = PostForm()
 
+        # Populate form with decrypted data on GET request
+        if request.method == 'GET':
+            form.title.data = post_to_update.decrypted_title
+            form.body.data = post_to_update.decrypted_body
+
+        # Process the submitted form on POST request
         if form.validate_on_submit():
-            post_to_update.update(title=form.title.data, body=form.body.data)
+            # Update the post attributes with new data
+            post_to_update.title = form.title.data
+            post_to_update.body = form.body.data
+
+            # Encrypt the data before saving
+            post_to_update.encrypt_data()
+            db.session.commit()
+
             flash('Post updated successfully', category='success')
+            security_logger.info(
+                f"Post update: Email={current_user.email}, Role={current_user.role}, PostID={post_to_update.id}, AuthorEmail={post_to_update.user.email}, IP={request.remote_addr}")
             return redirect(url_for('posts.posts'))
 
-        form.title.data = post_to_update.title
-        form.body.data = post_to_update.body
-        security_logger.info(
-            f"Post update: Email={current_user.email}, Role={current_user.role}, PostID={post_to_update.id}, AuthorEmail={post_to_update.user.email}, IP={request.remote_addr}")
-
         return render_template('posts/update.html', form=form)
+
     else:
         flash('You do not have permission to update this post.', category='danger')
         return render_template('home/index.html')

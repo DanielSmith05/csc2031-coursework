@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="error-message">
+    <h1>Attack Detected</h1>
+    <p>An attempt to exploit the application has been detected.</p>
+    <p><strong>Type of Attack:</strong> {{ attack_type }}</p>
+    <p>Please refrain from suspicious activities to ensure the security of the application.</p>
+    <p><a href="{{ url_for('index') }}">Return to the Main Menu</a></p>
+  </div>
+{% endblock %}
