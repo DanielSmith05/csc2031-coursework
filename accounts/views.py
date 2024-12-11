@@ -1,3 +1,6 @@
+import base64
+import secrets
+
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from datetime import datetime
 from markupsafe import Markup
@@ -37,20 +40,20 @@ def registration():
         if form.validate_on_submit():
             errors = []
 
-            if not is_valid_email(form.email.data):
-                errors.append('Invalid email address.')
+            #if not is_valid_email(form.email.data):
+            #    errors.append('Invalid email address.')
 
-            if not is_valid_name(form.firstname.data):
-                errors.append('First name must only contain letters or hyphens.')
+            #if not is_valid_name(form.firstname.data):
+            #    errors.append('First name must only contain letters or hyphens.')
 
-            if not is_valid_name(form.lastname.data):
-                errors.append('Last name must only contain letters or hyphens.')
+            #if not is_valid_name(form.lastname.data):
+            #    errors.append('Last name must only contain letters or hyphens.')
 
-            if not is_valid_uk_phone(form.phone.data):
-                errors.append('Invalid UK landline phone number format.')
+            #if not is_valid_uk_phone(form.phone.data):
+            #    errors.append('Invalid UK landline phone number format.')
 
-            if User.query.filter_by(email=form.email.data).first():
-                errors.append('Email already exists.')
+            #if User.query.filter_by(email=form.email.data).first():
+            #    errors.append('Email already exists.')
 
             if not verify_password(form.password.data):
                 errors.append('Invalid password format.')
@@ -61,12 +64,14 @@ def registration():
                 return render_template('accounts/registration.html', form=form)
 
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            salt = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
             new_user = User(email=form.email.data,
                             firstname=form.firstname.data,
                             lastname=form.lastname.data,
                             phone=form.phone.data,
                             password=hashed_password,
-                            role='end_user')
+                            role='end_user',
+                            salt=salt)
 
             db.session.add(new_user)
             db.session.commit()

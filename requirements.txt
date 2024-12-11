@@ -18,5 +18,6 @@ flask-qrcode
 flask-bcrypt
 WTForms
 
+
 pyotp
 cryptography

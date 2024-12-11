@@ -1,3 +1,6 @@
+import base64
+import os
+
 from flask import Flask, url_for, abort
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -17,6 +20,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask_bcrypt import Bcrypt
 from cryptography.fernet import Fernet
+from hashlib import scrypt
 
 app = Flask(__name__)
 
@@ -96,6 +100,26 @@ class Post(db.Model):
         self.body = body
         db.session.commit()
 
+    def encrypt_data(self):
+        key = self.user.generate_encryption_key()
+        cipher = Fernet(key)
+        self.title = cipher.encrypt(self.title.encode()).decode()
+        self.body = cipher.encrypt(self.body.encode()).decode()
+
+    def decrypt_text(self, encrypted_text, user):
+        fernet_key = user.generate_encryption_key()
+        fernet = Fernet(fernet_key)
+        decrypted_text = fernet.decrypt(encrypted_text).decode()
+        return decrypted_text
+
+    @property
+    def decrypted_title(self):
+        return self.decrypt_text(self.title, self.user)
+
+    @property
+    def decrypted_body(self):
+        return self.decrypt_text(self.body, self.user)
+
 class Log(db.Model):
     __tablename__ = 'logs'
 
@@ -142,18 +166,28 @@ class User(db.Model, UserMixin):
 
     # User log
     log = db.relationship("Log", uselist=False, back_populates="user")
+    salt = db.Column(db.String(32), nullable=False)
 
     def get_id(self):
         return str(self.id)
 
-    def __init__(self, email, firstname, lastname, phone, password, role):
+    def __init__(self, email, firstname, lastname, phone, password, role, salt):
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
         self.phone = phone
         self.password = password
         self.role = role
+        self.salt = salt
 
+    def generate_encryption_key(self):
+        raw_key = scrypt(
+            password=self.password.encode(),
+            salt=base64.urlsafe_b64decode(self.salt.encode()),
+            n=2048, r=8, p=1, dklen=32
+        )
+        fernet_key = base64.urlsafe_b64encode(raw_key)
+        return fernet_key
 
     def enable_mfa(self):
         """Enable MFA for the user."""
@@ -185,11 +219,11 @@ class PostView(ModelView):
     column_hide_backrefs = False
     column_list = ('id', 'userid', 'created', 'title', 'body', 'user')
 
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.role == 'db_admin'
+    #def is_accessible(self):
+        #return current_user.is_authenticated and current_user.role == 'db_admin'
 
-    def inaccessible_callback(self, name, **kwargs):
-        abort(403)
+    #def inaccessible_callback(self, name, **kwargs):
+        #abort(403)
 
 
 class UserView(ModelView):
@@ -231,6 +265,7 @@ default_limit = ['500/day']
 from accounts.views import accounts_bp
 from posts.views import posts_bp
 from security.views import security_bp
+
 
 # REGISTER BLUEPRINTS
 app.register_blueprint(accounts_bp)

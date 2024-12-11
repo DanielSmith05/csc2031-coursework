@@ -33,6 +33,7 @@ def create():
 
             if form.validate_on_submit():
                 new_post = Post(user=current_user, title=form.title.data, body=form.body.data)
+                new_post.encrypt_data()
 
                 db.session.add(new_post)
                 db.session.commit()
