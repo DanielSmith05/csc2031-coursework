@@ -19,3 +19,4 @@ flask-bcrypt
 WTForms
 
 pyotp
+cryptography

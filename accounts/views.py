@@ -13,43 +13,76 @@ from flask_bcrypt import Bcrypt
 accounts_bp = Blueprint('accounts', __name__, template_folder='templates')
 
 
+def is_valid_email(email):
+    return re.match(r'^[\w.%+-]+@[\w.-]+\.[a-zA-Z]{2,}$', email)
+
+def is_valid_name(name):
+    return re.match(r'^[a-zA-Z-]+$', name)
+
+def is_valid_uk_phone(phone):
+    patterns = [
+        r'^02\d-\d{8}$',
+        r'^011\d-\d{7}$',
+        r'^01\d1-\d{7}$',
+        r'^01\d{3}-\d{5}$',
+        r'^01\d{3}-\d{6}$'
+    ]
+    return any(re.match(pattern, phone) for pattern in patterns)
+
 @accounts_bp.route('/registration', methods=['GET', 'POST'])
 def registration():
     if not current_user.is_authenticated:
         form = RegistrationForm()
 
         if form.validate_on_submit():
+            errors = []
+
+            if not is_valid_email(form.email.data):
+                errors.append('Invalid email address.')
+
+            if not is_valid_name(form.firstname.data):
+                errors.append('First name must only contain letters or hyphens.')
+
+            if not is_valid_name(form.lastname.data):
+                errors.append('Last name must only contain letters or hyphens.')
+
+            if not is_valid_uk_phone(form.phone.data):
+                errors.append('Invalid UK landline phone number format.')
+
             if User.query.filter_by(email=form.email.data).first():
-                flash('Email already exists', category="danger")
-                return render_template('accounts/registration.html', form=form)
+                errors.append('Email already exists.')
 
             if not verify_password(form.password.data):
-                flash('Invalid password format', category="danger")
+                errors.append('Invalid password format.')
+
+            if errors:
+                for error in errors:
+                    flash(error, category="danger")
                 return render_template('accounts/registration.html', form=form)
-            else:
-                hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-                new_user = User(email=form.email.data,
-                                firstname=form.firstname.data,
-                                lastname=form.lastname.data,
-                                phone=form.phone.data,
-                                password=hashed_password,
-                                role='end_user')
 
-                db.session.add(new_user)
-                db.session.commit()
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            new_user = User(email=form.email.data,
+                            firstname=form.firstname.data,
+                            lastname=form.lastname.data,
+                            phone=form.phone.data,
+                            password=hashed_password,
+                            role='end_user')
 
+            db.session.add(new_user)
+            db.session.commit()
 
-                new_user.generate_log()
-                security_logger.info(
-                    f"User registration: Email={new_user.email}, Role={new_user.role}, IP={request.remote_addr}")
+            new_user.generate_log()
+            security_logger.info(
+                f"User registration: Email={new_user.email}, Role={new_user.role}, IP={request.remote_addr}")
 
-                flash('Account Created. Please set up MFA before logging in.', category='success')
-                return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
+            flash('Account Created. Please set up MFA before logging in.', category='success')
+            return redirect(url_for('accounts.mfa_setup', mfa_key=new_user.mfa_key))
 
         return render_template('accounts/registration.html', form=form)
     else:
-        flash('already registered', category="danger")
+        flash('Already registered', category="danger")
         return render_template('home/index.html')
+
 
 
 

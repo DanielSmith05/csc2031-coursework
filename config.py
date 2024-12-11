@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, abort
+from flask import Flask, url_for, abort
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
@@ -16,6 +16,7 @@ from flask_admin.theme import Bootstrap4Theme
 import logging
 from logging.handlers import RotatingFileHandler
 from flask_bcrypt import Bcrypt
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
