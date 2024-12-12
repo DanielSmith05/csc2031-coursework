@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, url_for, redirect, flash, request
+from flask import Blueprint, render_template, flash
 from flask_login import current_user
-from config import User, security_logger
+from config import User
 
 security_bp = Blueprint('security', __name__, template_folder='templates')
 

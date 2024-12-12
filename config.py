@@ -21,6 +21,7 @@ from logging.handlers import RotatingFileHandler
 from flask_bcrypt import Bcrypt
 from cryptography.fernet import Fernet
 from hashlib import scrypt
+from flask_talisman import Talisman
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,7 +31,22 @@ app = Flask(__name__)
 
 bcrypt = Bcrypt(app)
 
+csp = {'script-src': [ 'https://www.gstatic.com/recaptcha/', 'https://www.google.com/recaptcha/',
+                       "'unsafe-inline'", 'https://cdn.jsdelivr.net/', 'https://127.0.0.1:5000/'],
+    'frame-src': [ 'https://www.google.com/recaptcha/', 'https://recaptcha.google.com/recaptcha/',
+                   'https://127.0.0.1:5000/'],
+    'style-src': [
+        'https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/',
+        "'unsafe-inline'", 'https://127.0.0.1:5000/'],
+    'font-src': [
+        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/',
+        'https://cdn.jsdelivr.net/', 'https://127.0.0.1:5000/'
+    ]
+    }
+talisman = Talisman(app, content_security_policy=csp)
+
 qrcode = QRcode(app)
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'accounts.login'
 
@@ -195,13 +211,8 @@ class User(db.Model, UserMixin):
         return fernet_key
 
     def enable_mfa(self):
-        """Enable MFA for the user."""
         self.mfa_enabled = True
         db.session.commit()
-
-    @property
-    def is_active(self):
-        return self.active
 
     def generate_log(self):
         if not self.log:
@@ -224,11 +235,11 @@ class PostView(ModelView):
     column_hide_backrefs = False
     column_list = ('id', 'userid', 'created', 'title', 'body', 'user')
 
-    #def is_accessible(self):
-        #return current_user.is_authenticated and current_user.role == 'db_admin'
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'db_admin'
 
-    #def inaccessible_callback(self, name, **kwargs):
-        #abort(403)
+    def inaccessible_callback(self, name, **kwargs):
+        abort(403)
 
 
 class UserView(ModelView):
@@ -236,11 +247,11 @@ class UserView(ModelView):
     column_hide_backrefs = False
     column_list = ('id', 'email', 'password', 'firstname', 'lastname', 'phone', 'mfa_key', 'mfa_enabled', 'posts', 'role')
 
-    #def is_accessible(self):
-    #    return current_user.is_authenticated and current_user.role == 'db_admin'
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'db_admin'
 
-    #def inaccessible_callback(self, name, **kwargs):
-    #    abort(403)
+    def inaccessible_callback(self, name, **kwargs):
+        abort(403)
 
 class LogView(ModelView):
     column_display_pk = True
@@ -248,11 +259,11 @@ class LogView(ModelView):
     column_list = ('id', 'log_user_id', 'user_registration_datetime', 'latest_login_datetime',
                    'previous_login_datetime', 'latest_ip', 'previous_ip')
 
-    #def is_accessible(self):
-    #    return current_user.is_authenticated and current_user.role == 'db_admin'
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'db_admin'
 
-    #def inaccessible_callback(self, name, **kwargs):
-    #    abort(403)
+    def inaccessible_callback(self, name, **kwargs):
+        abort(403)
 
 admin = Admin(app, name='DB Admin', theme=Bootstrap4Theme(fluid=True))
 admin._menu = admin._menu[1:]

@@ -1,6 +1,5 @@
 import base64
 import secrets
-
 from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from datetime import datetime
 from markupsafe import Markup
@@ -9,7 +8,7 @@ from config import User, db, limiter, security_logger, bcrypt
 import re
 import pyotp
 from flask_login import login_user, logout_user, current_user
-from flask_bcrypt import Bcrypt
+
 
 
 
@@ -40,20 +39,20 @@ def registration():
         if form.validate_on_submit():
             errors = []
 
-            #if not is_valid_email(form.email.data):
-            #    errors.append('Invalid email address.')
+            if not is_valid_email(form.email.data):
+                errors.append('Invalid email address.')
 
-            #if not is_valid_name(form.firstname.data):
-            #    errors.append('First name must only contain letters or hyphens.')
+            if not is_valid_name(form.firstname.data):
+                errors.append('First name must only contain letters or hyphens.')
 
-            #if not is_valid_name(form.lastname.data):
-            #    errors.append('Last name must only contain letters or hyphens.')
+            if not is_valid_name(form.lastname.data):
+                errors.append('Last name must only contain letters or hyphens.')
 
-            #if not is_valid_uk_phone(form.phone.data):
-            #    errors.append('Invalid UK landline phone number format.')
+            if not is_valid_uk_phone(form.phone.data):
+                errors.append('Invalid UK landline phone number format.')
 
-            #if User.query.filter_by(email=form.email.data).first():
-            #    errors.append('Email already exists.')
+            if User.query.filter_by(email=form.email.data).first():
+                errors.append('Email already exists.')
 
             if not verify_password(form.password.data):
                 errors.append('Invalid password format.')
@@ -92,7 +91,7 @@ def registration():
 
 
 @accounts_bp.route('/login', methods=['GET', 'POST'])
-@limiter.limit('10/minute')
+@limiter.limit('5/minute')
 def login():
     if not current_user.is_authenticated:
         form = LoginForm()
@@ -106,28 +105,35 @@ def login():
                 flash('Invalid credentials. Please try again.', category="danger")
                 return render_template('accounts/login.html', form=form)
 
-            # Check password
+
             if not bcrypt.check_password_hash(user.password, form.password.data):
                 session['failed_attempts'] += 1
                 remaining_attempts = 3 - session['failed_attempts']
+
                 security_logger.warning(
                     f"Invalid login attempt: Email={form.email.data}, Attempts={session['failed_attempts']}, IP={request.remote_addr}")
+
                 if session['failed_attempts'] >= 3:
-                    current_user.is_active = False
+
                     security_logger.error(
                         f"Maximum invalid login attempts reached: Email={form.email.data}, Attempts={session['failed_attempts']}, IP={request.remote_addr}")
+
                     flash('Too many failed attempts. Please unlock your account.', category="danger")
                     flash(Markup('<a href="/unlock">unlock account</a>'))
+
                     return render_template('accounts/login.html')
+
                 flash(f'Incorrect password. {remaining_attempts} attempts left.', category="danger")
+
                 return render_template('accounts/login.html', form=form)
 
-            # Redirect to MFA setup if not enabled
+
             if not user.mfa_enabled:
                 flash('MFA is not set up. Please set it up to continue.', category="warning")
+
                 return redirect(url_for('accounts.mfa_setup', mfa_key=user.mfa_key))
 
-            # MFA Check
+
             if not pyotp.TOTP(user.mfa_key).verify(form.mfa_pin.data):
                 flash('Invalid MFA code. Please try again.', category="danger")
                 security_logger.warning(
@@ -156,12 +162,15 @@ def login():
 
             if user.role == 'end_user':
                 return render_template('posts/posts.html')
+
             elif user.role == 'db_admin':
-                return redirect('http://127.0.0.1:5000/admin')
+                return redirect('https://127.0.0.1:5000/admin')
+
             elif user.role == 'sec_admin':
                 return render_template('home/index.html')
 
         return render_template('accounts/login.html', form=form)
+
     else:
         flash('already logged in', category="danger")
         return render_template('home/index.html')
@@ -185,38 +194,38 @@ def unlock():
     return render_template('accounts/login.html', form=form)
 
 def verify_password(password):
-    passrange = False
-    passdigit = False
-    passupper = False
-    passlower = False
-    passspecial = False
+    pass_range = False
+    pass_digit = False
+    pass_upper = False
+    pass_lower = False
+    pass_special = False
 
     if re.match(r'^.{8,15}$', password):
-        passrange = True
+        pass_range = True
     else:
         flash('Password must be between 8 and 15 characters long!')
 
     if re.search(r'\d', password):
-        passdigit = True
+        pass_digit = True
     else:
         flash('Password must contain a digit!')
 
     if re.search(r'[A-Z]', password):
-        passupper = True
+        pass_upper = True
     else:
         flash('Password must contain at least one uppercase letter!')
 
     if re.search(r'[a-z]', password):
-        passlower = True
+        pass_lower = True
     else:
         flash('Password must contain at least one lowercase letter!')
 
     if re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        passspecial = True
+        pass_special = True
     else:
         flash('Password must contain at least one special character!')
 
-    if not (passrange and passdigit and passupper and passlower and passspecial):
+    if not (pass_range and pass_digit and pass_upper and pass_lower and pass_special):
         return False
 
     return True

@@ -22,7 +22,7 @@
                         {{ form.csrf_token() }}
 
                         <div class="form-group">
-                            {{ form.mfa_pin.label }}<span style="color: red">*</span>
+                            {{ form.mfa_pin.label }}<span class="text-danger">*</span>
                             {{ form.mfa_pin(class="form-control") }}
                         </div>
                     </div>

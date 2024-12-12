@@ -1,3 +1,5 @@
+import os
+
 from config import app
 from flask import render_template, request, url_for, redirect
 from werkzeug.exceptions import TooManyRequests
@@ -50,7 +52,9 @@ def not_implemented(error):
     return render_template('errors/error.html', error_code=501, error_message="Not Implemented",
                            description="The server does not recognize the request method or lacks the ability to fulfill it."), 501
 
-
+# SSL certificate and key paths
+CERT_PATH = os.path.join(os.getcwd(), 'ssl', 'my_cert.pem')
+KEY_PATH = os.path.join(os.getcwd(), 'ssl', 'my_key.pem')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(ssl_context=(CERT_PATH, KEY_PATH), debug=True)

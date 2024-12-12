@@ -12,7 +12,7 @@
 
             <form method="POST">
                 <div class="p-2 bg-light border border-primary">
-                    <div style="text-align: left">
+                    <div class="text-left">
                         {{ form.csrf_token() }}
                         <div>
                             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -29,17 +29,17 @@
                         </div>
 
                         <div class="form-group">
-                            {{ form.email.label}}<span style="color: red">*</span>
+                            {{ form.email.label}}<span class="text-danger">*</span>
                             {{ form.email(class="form-control") }}
-                            {{ form.firstname.label}}<span style="color: red">*</span>
+                            {{ form.firstname.label}}<span class="text-danger">*</span>
                             {{ form.firstname(class="form-control") }}
-                            {{ form.lastname.label}}<span style="color: red">*</span>
+                            {{ form.lastname.label}}<span class="text-danger">*</span>
                             {{ form.lastname(class="form-control") }}
-                            {{ form.phone.label}}<span style="color: red">*</span>
+                            {{ form.phone.label}}<span class="text-danger">*</span>
                             {{ form.phone(class="form-control") }}
-                            {{ form.password.label}}<span style="color: red">*</span>
+                            {{ form.password.label}}<span class="text-danger">*</span>
                             {{ form.password(class="form-control") }}
-                            {{ form.confirm_password.label}}<span style="color: red">*</span>
+                            {{ form.confirm_password.label}}<span class="text-danger">*</span>
                             {{ form.confirm_password(class="form-control") }}
                             {% for error in form.confirm_password.errors %}
                                  {{ error }}

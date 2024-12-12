@@ -32,7 +32,7 @@
         <a class="nav-item nav-link" href="{{ url_for('posts.posts') }}">View Posts</a>
         {% endif %}
         {% if current_user.role == "db_admin" %}
-        <a class="nav-item nav-link" href="http://127.0.0.1:5000/admin">DB Admin</a>
+        <a class="nav-item nav-link" href="https://127.0.0.1:5000/admin">DB Admin</a>
         {% endif %}
         {% if current_user.role == "sec_admin" %}
         <a class="nav-item nav-link" href="{{ url_for('security.security') }}">Security</a>

@@ -7,7 +7,7 @@
             <div>
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% for category, message in messages %}
-                               <div style="text-align: left" class="alert alert-{{ category }} mt-3 alert-dismissible" role="alert">
+                               <div class="alert alert-{{ category }} mt-3 alert-dismissible text-left" role="alert">
                                    {{ message }}
                                    <button type="button" class="btn-close" data-bs-dismiss="alert" onclick=delete_flash(this)>
                                        <span>&times;</span>

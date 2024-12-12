@@ -12,19 +12,19 @@
             {%if form != null %}
             <form method="POST">
                 <div class="p-2 bg-light border border-primary">
-                    <div style="text-align: left">
+                    <div class="text-left">
                         {{ form.csrf_token() }}
 
                         <div class="form-group">
-                            {{ form.email.label}}<span style="color: red">*</span>
+                            {{ form.email.label}}<span class="text-danger">*</span>
                             {{ form.email(class="form-control") }}
                             </div>
                         <div class="form-group">
-                            {{ form.password.label}}<span style="color: red">*</span>
+                            {{ form.password.label}}<span class="text-danger">*</span>
                             {{ form.password(class="form-control") }}
                         </div>
                         <div class="form-group">
-                            {{ form.mfa_pin.label}}<span style="color: red">*</span>
+                            {{ form.mfa_pin.label}}<span class="text-danger">*</span>
                             {{ form.mfa_pin(class="form-control") }}
                         </div>
                         <div>
